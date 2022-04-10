@@ -1,0 +1,42 @@
+<FileViewer>:
+  
+
+    BoxLayout:
+        orientation: 'horizontal'
+        spacing: "10dp"
+        padding: "10dp"
+        Button:
+            size_hint: 1, None
+            height: "30dp"
+            pos_hint: {'center_y': .9}
+            text: 'Laden'
+            on_release: root.show_load()
+        Label:
+            size_hint: 1, None
+            height: "30dp"
+            pos_hint: {'center_y': .9}
+            # padding_x: "10dp"
+            text_size: self.size
+            halign: 'left'
+            valign: 'middle'
+            text: root.text_label
+
+<LoadDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Load"
+                on_release: root.load(filechooser.path, filechooser.selection)
+

@@ -1,0 +1,56 @@
+#:import librosa_layout librosa_layout
+#:import widget_examples widget_examples
+#:import navigation_screen_manager navigation_screen_manager
+#:import boxlayout_with_action_bar boxlayout_with_action_bar
+
+
+
+<MainMenu@GridLayout>:
+    cols: 2
+    Button:
+        text: "Librosa"
+        on_press: app.manager.push("LayoutExamplesTabs")
+    Label:
+        padding_x: "10dp"
+        text_size: self.size
+        halign: 'center'
+        valign: 'middle'
+        text:"Librosa Funktionalität. Sehen sie sich die Audiodateien im Zeitberreich an, etc."
+    Button:
+        text: "Vosk"
+        on_press: app.manager.push("WidgetsExample")
+    Label:
+        padding_x: "10dp"
+        text_size: self.size
+        halign: 'center'
+        valign: 'middle'
+        text:"Ermöglicht die Transkription von Sprachdateien. Unterstützt werden verschiedene Sprachen."
+    # Button:
+    #     text: "Images"
+    #     on_press: app.manager.push("ImagesExample")
+
+
+
+<MyScreenManager>:
+    Screen:
+        name: "MainMenu"
+        MainMenu:
+    Screen:
+        name: "LayoutExamplesTabs"
+        BoxLayoutWithActionBar:
+            title: "Librosa"
+            LayoutExamplesTabs:
+    Screen:
+        name: "WidgetsExample"
+        BoxLayoutWithActionBar:
+            title: "Vosk"
+            WidgetsExample:
+    Screen:
+        name: "ImagesExample"
+        BoxLayoutWithActionBar:
+            title: "Images"
+            ImagesExample:
+
+
+
+
