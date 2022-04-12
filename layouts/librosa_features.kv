@@ -4,11 +4,11 @@
     do_default_tab: False
     tab_width: self.parent.width / 5
     TabbedPanelItem:
-        text: "Audiodatei laden"
+        text: "load audio"
         FileViewer:
     TabbedPanelItem:
-        text: "Zeitbereich"
-        BoxLayoutExample:
+        text: "time domain"
+        TimeDomain:
     TabbedPanelItem:
         text: "Anchor"
         AnchorLayoutExample:
@@ -24,6 +24,46 @@
     TabbedPanelItem:
         text: "Page"
         PageLayoutExample:
+
+
+
+<TimeDomain>:
+    cols: 2
+    padding: "10dp"
+    spacing: "10dp"
+    BoxLayout:
+        spacing: "10dp"
+        orientation:"vertical"
+        Button:
+            text: "Play Audio"
+            on_press: root.play_audio()
+        Button:
+            text: "Stop Audio"
+            on_press: root.stop_audio()
+    Label:
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'
+        text: "Listen to the selected audio file in the 'load audio' tab"
+    Button:
+        text: "Show signal"
+    Label:
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'
+        text: "Shows a plot of the audio signal in the time domain"
+    Button:
+        text: "B3"
+    Label:
+        text: "B3"
+    Button:
+        text: "B4"
+    Label:
+        text: "B4"
+  
+
+
+
 
 
 <PageLayoutExample@PageLayout>:
