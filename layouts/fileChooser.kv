@@ -1,5 +1,6 @@
+
+
 <FileViewer>:
-  
 
     BoxLayout:
         orientation: 'horizontal'
@@ -15,11 +16,10 @@
             size_hint: 1, None
             height: "30dp"
             pos_hint: {'center_y': .9}
-            # padding_x: "10dp"
             text_size: self.size
             halign: 'left'
             valign: 'middle'
-            text: root.text_label
+            text: root.path_label
 
 <LoadDialog>:
     BoxLayout:
@@ -39,4 +39,3 @@
             Button:
                 text: "Load"
                 on_release: root.load(filechooser.path, filechooser.selection)
-
