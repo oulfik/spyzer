@@ -1,0 +1,17 @@
+
+<MyPopup>:
+    auto_dismiss: False
+    size_hint: None, None
+    size: "400dp", "400dp"
+    title: root.title
+    BoxLayout:
+        padding: "10dp"
+        orientation:"vertical"
+        Label:
+            text:root.text
+        
+        Button:
+            size_hint: .5, .25
+            pos_hint: { "center_x": .5 }
+            text:"Close"
+            on_release: root.dismiss()

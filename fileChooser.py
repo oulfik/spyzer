@@ -1,4 +1,3 @@
-from tkinter import Widget
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
 from kivy.factory import Factory
@@ -6,16 +5,18 @@ from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.popup import Popup
 import os
 from kivy.lang import Builder
-
-
 Builder.load_file('layouts/fileChooser.kv') 
-
+Builder.load_file('layouts/myPopup.kv') 
+from kivy.core.window import Window
 
 class LoadDialog(FloatLayout):
     load = ObjectProperty(None)
     cancel = ObjectProperty(None)
 
 
+class MyPopup(Popup):
+    title = "Warning"
+    text = "You need to select an .wav audio file!"
 
 class FileViewer(FloatLayout):
     loadfile = ObjectProperty(None)
@@ -32,10 +33,15 @@ class FileViewer(FloatLayout):
 
 
     def load(self, path, filename):
-        print("FIELNAME" + os.path.join(path, filename[0]))
-        self.path_label = os.path.join(path, filename[0])
-        app = App.get_running_app()
-        app.audio_file = self.path_label
+        file_path = os.path.join(path, filename[0])
+        if ".wav" in file_path:
+            self.path_label = file_path
+            app = App.get_running_app()
+            app.audio_file = self.path_label
+        else:
+            popup = MyPopup()
+            popup.open()
+
         self.dismiss_popup()
 
 

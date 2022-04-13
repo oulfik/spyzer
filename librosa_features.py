@@ -1,5 +1,6 @@
 from kivy.lang import Builder
 from kivy.metrics import dp
+from kivy.app import App
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
@@ -28,11 +29,14 @@ class TimeDomain(GridLayout):
     sound = ObjectProperty(None)
     
     def play_audio(self):
-        self.sound = SoundLoader.load('audio/test.wav')
-        if self.sound:
-            print("Sound found at %s" % self.sound.source)
-            print("Sound is %.3f seconds" % self.sound.length)
-            self.sound.play()
+        app = App.get_running_app()
+        file_path = app.audio_file 
+        if file_path:
+            self.sound = SoundLoader.load(file_path)
+            if self.sound:
+                print("Sound found at %s" % self.sound.source)
+                print("Sound is %.3f seconds" % self.sound.length)
+                self.sound.play()
 
 
     def stop_audio(self):
