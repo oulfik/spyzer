@@ -10,7 +10,7 @@
         text: "time domain"
         TimeDomain:
     TabbedPanelItem:
-        text: "Anchor"
+        text: "frequency domain"
         AnchorLayoutExample:
     TabbedPanelItem:
         text: "Grid"
@@ -47,19 +47,37 @@
         text: "Listen to the selected audio file in the 'load audio' tab"
     Button:
         text: "Show signal"
+        on_press: root.visualize_audio()
     Label:
         text_size: self.size
         halign: 'left'
         valign: 'middle'
         text: "Shows a plot of the audio signal in the time domain"
+    BoxLayout:
+        spacing: "10dp"
+        orientation:"vertical"
+        Button:
+            text: "Audio features"
+            on_press: root.compute_audio_feat_res()
+        TextInput:
+            id: frame_length_input
+            hint_text: "Set frame length (defaults to 2048)"
+            text: root.frame_length
+            multiline: False
+            on_text_validate: root.on_text_validate(self)
+        TextInput:
+            id: hop_length_input
+            hint_text: "Set hop length (defaults to 512)"
+            text: root.hop_length
+            multiline: False
+            on_text_validate: root.on_text_validate(self)
+    TextInput:
+        text: root.audio_feat_res
+        readonly: True
+
     Button:
-        text: "B3"
-    Label:
-        text: "B3"
-    Button:
-        text: "B4"
-    Label:
-        text: "B4"
+        text: "Plot audio features"
+
   
 
 

@@ -7,11 +7,15 @@
     BoxLayout:
         padding: "10dp"
         orientation:"vertical"
-        Label:
-            text:root.text
-        
+        ScrollView:
+            Label:
+                text:root.text
+                size_hint_y: None
+                text_size: (self.width, None)
+                height: self.texture_size[1]
         Button:
-            size_hint: .5, .25
+            size_hint: None, None
+            size: "100dp", "50dp"
             pos_hint: { "center_x": .5 }
             text:"Close"
             on_release: root.dismiss()

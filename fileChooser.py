@@ -7,7 +7,6 @@ import os
 from kivy.lang import Builder
 Builder.load_file('layouts/fileChooser.kv') 
 Builder.load_file('layouts/myPopup.kv') 
-from kivy.core.window import Window
 
 class LoadDialog(FloatLayout):
     load = ObjectProperty(None)
