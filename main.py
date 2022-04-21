@@ -1,5 +1,5 @@
 from kivy.config import Config
-Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
+Config.set('input', 'mouse', 'mouse,multitouch_on_demand') #disable right click red dot on non-touch devices
 
 from kivy.app import App
 from kivy.metrics import dp

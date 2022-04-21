@@ -11,6 +11,7 @@ from kivy.properties import ObjectProperty, NumericProperty, StringProperty
 from kivy.core.window import Window
 from kivy.uix.popup import Popup
 
+
 import matplotlib.pyplot as plt
 import librosa
 import librosa.display
@@ -33,17 +34,35 @@ class StackLayoutExample(StackLayout):
             b = Button(text=str(i+1), size_hint=(None, None), size=(size, size))
             self.add_widget(b)
 
-
-class TimeDomain(GridLayout):
+class BaseDomain():
     frame_length = StringProperty("") 
     hop_length = StringProperty("")
     sound = ObjectProperty(None)
-    audio_feat_res = StringProperty("Computes time domain audio features. Zero crossing rate (ZCR) and root mean square of energy (RMSE).")
+    audio_feat_res = StringProperty("")
 
     def get_current_file_path(self):
         app = App.get_running_app()
         file_path = app.audio_file 
         return file_path
+
+    def on_text_validate(self, widget):
+        try:
+            x = int(widget.text)
+            if x < 0:
+                raise ValueError
+        except ValueError:
+            print("Value must be a positive Number!")
+            popup = MyPopup()
+            popup.open()
+        else:
+            if self.ids.frame_length_input.text:
+                self.frame_length = self.ids.frame_length_input.text
+            if self.ids.hop_length_input.text:
+                self.hop_length = self.ids.hop_length_input.text
+
+
+class TimeDomain(GridLayout, BaseDomain):
+    audio_feat_res = StringProperty("Computes time domain audio features. Zero crossing rate (ZCR) and root mean square of energy (RMSE).")
     
     def play_audio(self):
         file_path = self.get_current_file_path()
@@ -74,6 +93,40 @@ class TimeDomain(GridLayout):
 
         Window.show()
 
+
+    def visualize_audio_features(self):
+        Window.hide()
+        file_path = self.get_current_file_path()
+        if file_path:
+            zcr = self.compute_zcr(file_path)
+            rms = self.compute_rms(file_path)
+            frames = range(len(zcr))
+
+            if self.hop_length:
+                t = librosa.frames_to_time(frames, hop_length=int(self.hop_length))
+            else:
+                t = librosa.frames_to_time(frames)
+        
+            plt.figure()
+
+            ax = plt.subplot(2, 1, 1)
+            plt.plot(t, zcr)
+            plt.xlabel("time(s)")
+            plt.ylabel("ZCR")
+            plt.title("Zero crossing rate")
+
+            plt.subplot(2, 1, 2)
+            plt.plot(t, rms)
+            plt.xlabel("time(s)")
+            plt.ylabel("RMS")
+            plt.title("Root mean square")
+
+            plt.show()
+        Window.show()
+
+
+
+
     def compute_zcr(self, file_path):
         audio, _ = librosa.load(file_path)
         if self.frame_length and self.hop_length:
@@ -88,35 +141,61 @@ class TimeDomain(GridLayout):
                 
     
     def compute_rms(self, file_path):
-        pass
+        audio, _ = librosa.load(file_path)
+        if self.frame_length and self.hop_length:
+            rms_audio = librosa.feature.rms(
+                audio, 
+                frame_length=int(self.frame_length), 
+                hop_length=int(self.hop_length))[0]
+        else:
+            rms_audio = librosa.feature.rms(
+                audio)[0]
+        return rms_audio       
 
 
-    def compute_audio_feat_res(self):
+    def get_audio_feat_res(self):
         file_path = self.get_current_file_path()
         if file_path:
             zcr = self.compute_zcr(file_path)
+            rms = self.compute_rms(file_path)
+
             zcr_median = np.median(zcr)
             zcr_mean = np.mean(zcr)
+            rms_median = np.median(rms)
+            rms_mean = np.mean(rms)
         
-        self.audio_feat_res = f"Audio feature results:\n ZCR_mean: {zcr_mean}\n ZCR_median: {zcr_median}"
+        self.audio_feat_res = f"Audio feature results:\n ZCR_mean: {zcr_mean}\n ZCR_median: {zcr_median}\n RMS_mean: {rms_mean}\n RMS_median: {rms_median}"
 
             
-
-
-    def on_text_validate(self, widget):
-        try:
-            x = int(widget.text)
-        except ValueError:
-            print("Value must be a positive Number!")
-            popup = MyPopup()
-            popup.open()
-        else:
-            if self.ids.frame_length_input.text:
-                self.frame_length = self.ids.frame_length_input.text
-            if self.ids.hop_length_input.text:
-                self.hop_length = self.ids.hop_length_input.text
         
  
+class FrequencyDomain(GridLayout, BaseDomain):
+    audio_feat_res = StringProperty("Computes frequency domain audio features. Fundamental frequency (F0) and spectral centroid (SC).")
+
+
+    def show_spectrogram(self):
+        Window.hide()
+        file_path = self.get_current_file_path()
+        if file_path:
+            audio, _ = librosa.load(file_path)
+            fig, ax = plt.subplots()
+            if self.frame_length and self.hop_length:
+                S_audio = librosa.stft(audio, n_fft=int(self.frame_length), hop_length=int(self.hop_length))
+                img = librosa.display.specshow(librosa.amplitude_to_db(S_audio,ref=np.max),
+                y_axis='log', 
+                x_axis='time', 
+                ax=ax, hop_length=int(self.hop_length))
+            else:
+                S_audio = librosa.stft(audio)
+                img = librosa.display.specshow(librosa.amplitude_to_db(S_audio,ref=np.max),
+                y_axis='log',
+                x_axis='time', 
+                ax=ax)
+            
+            ax.set_title('Power spectrogram')
+            fig.colorbar(img, ax=ax, format="%+2.0f dB")
+            plt.savefig('test1.png')
+        Window.show()
 
 
 

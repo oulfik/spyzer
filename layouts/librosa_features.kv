@@ -11,7 +11,7 @@
         TimeDomain:
     TabbedPanelItem:
         text: "frequency domain"
-        AnchorLayoutExample:
+        FrequencyDomain:
     TabbedPanelItem:
         text: "Grid"
         GridLayoutExample:
@@ -58,7 +58,7 @@
         orientation:"vertical"
         Button:
             text: "Audio features"
-            on_press: root.compute_audio_feat_res()
+            on_press: root.get_audio_feat_res()
         TextInput:
             id: frame_length_input
             hint_text: "Set frame length (defaults to 2048)"
@@ -77,8 +77,44 @@
 
     Button:
         text: "Plot audio features"
+        on_press: root.visualize_audio_features()
+
 
   
+<FrequencyDomain>:
+    cols: 2
+    padding: "10dp"
+    spacing: "10dp"
+    Button:
+        text: "Save spectrogram"
+        on_press: root.show_spectrogram()
+    Label:
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'
+        text: "Saves a spectrogram of the selected audio file as an image file on disk"
+    BoxLayout:
+        spacing: "10dp"
+        orientation:"vertical"
+        Button:
+            text: "Audio features"
+            on_press: root.get_audio_feat_res()
+        TextInput:
+            id: frame_length_input
+            hint_text: "Set frame length (defaults to 2048)"
+            text: root.frame_length
+            multiline: False
+            on_text_validate: root.on_text_validate(self)
+        TextInput:
+            id: hop_length_input
+            hint_text: "Set hop length (defaults to 512)"
+            text: root.hop_length
+            multiline: False
+            on_text_validate: root.on_text_validate(self)
+    TextInput:
+        text: root.audio_feat_res
+        readonly: True
+
 
 
 

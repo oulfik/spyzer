@@ -32,6 +32,7 @@ class FileViewer(FloatLayout):
 
 
     def load(self, path, filename):
+        print("PATH" + path)
         file_path = os.path.join(path, filename[0])
         if ".wav" in file_path:
             self.path_label = file_path

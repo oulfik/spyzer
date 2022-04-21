@@ -2,3 +2,6 @@
 kivy-speech-env/
 *.wav
 *.ogg
+*.jpg
+*.png
+*.gif
