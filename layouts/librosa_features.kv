@@ -115,7 +115,14 @@
         text: root.audio_feat_res
         readonly: True
 
-
+    Button:
+        text: "Plot audio features"
+        on_press: root.visualize_audio_features()
+    Label:
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'
+        text: "Overlays the audio features in a spectrogram and saves the figure as an image file"
 
 
 

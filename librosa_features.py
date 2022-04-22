@@ -21,8 +21,8 @@ Builder.load_file("layouts/librosa_features.kv")
 
 
 class MyPopup(Popup):
-    title = "Error"
-    text = "Value must be a positive number!"
+    title = StringProperty("Error") 
+    text = StringProperty("Value must be a positive number!") 
 
 class StackLayoutExample(StackLayout):
     def __init__(self, **kwargs):
@@ -164,7 +164,8 @@ class TimeDomain(GridLayout, BaseDomain):
             rms_median = np.median(rms)
             rms_mean = np.mean(rms)
         
-        self.audio_feat_res = f"Audio feature results:\n ZCR_mean: {zcr_mean}\n ZCR_median: {zcr_median}\n RMS_mean: {rms_mean}\n RMS_median: {rms_median}"
+        self.audio_feat_res = (f"Audio feature results:\n ZCR_mean: {zcr_mean}\n" 
+                               f" ZCR_median: {zcr_median}\n RMS_mean: {rms_mean}\n RMS_median: {rms_median}")
 
             
         
@@ -174,7 +175,6 @@ class FrequencyDomain(GridLayout, BaseDomain):
 
 
     def show_spectrogram(self):
-        Window.hide()
         file_path = self.get_current_file_path()
         if file_path:
             audio, _ = librosa.load(file_path)
@@ -194,9 +194,123 @@ class FrequencyDomain(GridLayout, BaseDomain):
             
             ax.set_title('Power spectrogram')
             fig.colorbar(img, ax=ax, format="%+2.0f dB")
-            plt.savefig('test1.png')
-        Window.show()
+            plt.savefig('spectrogram.png')
+        
+        popup = MyPopup(title="Info", text="Spectrogram saved succesfully!")
+        popup.open()
 
+
+
+
+    def compute_f0(self, file_path):
+        audio, _ = librosa.load(file_path)
+        if self.frame_length and self.hop_length:
+            f0, _, _ = librosa.pyin(audio, 
+            fmin=50, # expected minimum f0 frequency for a speech signal
+            fmax=500, # expected maximum f0 frequency for a speech signal
+            frame_length=int(self.frame_length), 
+            hop_length=int(self.hop_length))
+        else:
+            f0, _, _ = librosa.pyin(audio, 
+            fmin=50, # expected minimum f0 frequency for a speech signal
+            fmax=500) # expected maximum f0 frequency for a speech signal
+
+        return f0
+
+
+    def compute_sc(self, file_path):
+        audio, _ = librosa.load(file_path)
+        if self.frame_length and self.hop_length:
+            sc_audio = librosa.feature.spectral_centroid(
+            y=audio, 
+            n_fft=int(self.frame_length), 
+            hop_length=int(self.hop_length))[0]
+        else:
+            sc_audio = librosa.feature.spectral_centroid(y=audio)[0]
+        
+        return sc_audio
+    
+
+    def get_audio_feat_res(self):
+        file_path = self.get_current_file_path()
+        if file_path:
+            f0 = self.compute_f0(file_path)
+            f0_no_nans = f0[~np.isnan(f0)]
+            sc = self.compute_sc(file_path)
+
+            f0_median = np.median(f0_no_nans)
+            f0_mean = np.mean(f0_no_nans)
+            f0_range = np.max(f0_no_nans) - np.min(f0_no_nans)
+            sc_median = np.median(sc)
+            sc_mean = np.mean(sc)
+        
+        self.audio_feat_res = (
+        f"Audio feature results:\n F0_mean: {f0_mean}\n" 
+        f" F0_median: {f0_median}\n F0_range: {f0_range}\n SC_median: {sc_median}\n"
+        f" SC_mean: {sc_mean}")
+
+    
+    def visualize_audio_features(self):
+        file_path = self.get_current_file_path()
+        if file_path:
+            audio, _ = librosa.load(file_path)
+            f0 = self.compute_f0(file_path)
+            sc = self.compute_sc(file_path)
+            times = librosa.times_like(f0)
+
+            if self.frame_length and self.hop_length:
+                times = librosa.times_like(f0, hop_length=int(self.hop_length))
+                D = librosa.amplitude_to_db(np.abs(librosa.stft(audio, 
+                hop_length=int(self.hop_length), 
+                n_fft=int(self.frame_length))), 
+                ref=np.max)
+                fig, ax = plt.subplots()
+                img = librosa.display.specshow(D, 
+                    x_axis='time', 
+                    y_axis='log', 
+                    ax=ax, 
+                    hop_length=int(self.hop_length), 
+                    n_fft=int(self.frame_length))
+                ax.set(title='pYIN fundamental frequency estimation')
+                fig.colorbar(img, ax=ax, format="%+2.f dB")
+                ax.plot(times, f0, label='f0', color='cyan', linewidth=3)
+                ax.legend(loc='upper right')
+                plt.savefig('f0_estimation.png')
+
+                fig, ax = plt.subplots()
+                S, phase = librosa.magphase(librosa.stft(y=audio, hop_length=int(self.hop_length), 
+                n_fft=int(self.frame_length)))
+                librosa.display.specshow(librosa.amplitude_to_db(S, ref=np.max),
+                                        y_axis='log', x_axis='time', ax=ax, 
+                                        hop_length=int(self.hop_length), 
+                                        n_fft=int(self.frame_length))
+                ax.plot(times, sc.T, label='Spectral centroid', color='w')
+                ax.legend(loc='upper right')
+                fig.colorbar(img, ax=ax, format="%+2.f dB")
+                ax.set(title='log Power spectrogram')
+                plt.savefig('spectral_centroid.png')
+            else:
+                D = librosa.amplitude_to_db(np.abs(librosa.stft(audio)), ref=np.max)
+                fig, ax = plt.subplots()
+                img = librosa.display.specshow(D, x_axis='time', y_axis='log', ax=ax)
+                ax.set(title='pYIN fundamental frequency estimation')
+                fig.colorbar(img, ax=ax, format="%+2.f dB")
+                ax.plot(times, f0, label='f0', color='cyan', linewidth=3)
+                ax.legend(loc='upper right')
+                plt.savefig('f0_estimation.png')
+
+                fig, ax = plt.subplots()
+                S, phase = librosa.magphase(librosa.stft(y=audio))
+                librosa.display.specshow(librosa.amplitude_to_db(S, ref=np.max),
+                                        y_axis='log', x_axis='time', ax=ax)
+                ax.plot(times, sc.T, label='Spectral centroid', color='w')
+                ax.legend(loc='upper right')
+                fig.colorbar(img, ax=ax, format="%+2.f dB")
+                ax.set(title='log Power spectrogram')
+                plt.savefig('spectral_centroid.png')
+
+        popup = MyPopup(title="Info", text="Succesfully created the image files!")
+        popup.open()
 
 
 class AnchorLayoutExample(AnchorLayout):
