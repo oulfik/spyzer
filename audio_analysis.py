@@ -8,16 +8,17 @@ from kivy.uix.button import Button
 from kivy.uix.stacklayout import StackLayout
 from kivy.core.audio import SoundLoader
 from kivy.properties import ObjectProperty, NumericProperty, StringProperty
-from kivy.core.window import Window
 from kivy.uix.popup import Popup
-
+from kivy.clock import Clock
 
 import matplotlib.pyplot as plt
 import librosa
 import librosa.display
 import numpy as np
 
-Builder.load_file("layouts/librosa_features.kv")
+from utils import window_hide_decorator
+
+Builder.load_file("layouts/audio_analysis.kv")
 
 
 class MyPopup(Popup):
@@ -39,6 +40,7 @@ class BaseDomain():
     hop_length = StringProperty("")
     sound = ObjectProperty(None)
     audio_feat_res = StringProperty("")
+    plot_path = "images/analysis/"
 
     def get_current_file_path(self):
         app = App.get_running_app()
@@ -173,7 +175,7 @@ class TimeDomain(GridLayout, BaseDomain):
 class FrequencyDomain(GridLayout, BaseDomain):
     audio_feat_res = StringProperty("Computes frequency domain audio features. Fundamental frequency (F0) and spectral centroid (SC).")
 
-
+    @window_hide_decorator
     def show_spectrogram(self):
         file_path = self.get_current_file_path()
         if file_path:
@@ -194,10 +196,7 @@ class FrequencyDomain(GridLayout, BaseDomain):
             
             ax.set_title('Power spectrogram')
             fig.colorbar(img, ax=ax, format="%+2.0f dB")
-            plt.savefig('spectrogram.png')
-        
-        popup = MyPopup(title="Info", text="Spectrogram saved succesfully!")
-        popup.open()
+            plt.show()
 
 
 
@@ -249,7 +248,8 @@ class FrequencyDomain(GridLayout, BaseDomain):
         f" F0_median: {f0_median}\n F0_range: {f0_range}\n SC_median: {sc_median}\n"
         f" SC_mean: {sc_mean}")
 
-    
+
+    @window_hide_decorator
     def visualize_audio_features(self):
         file_path = self.get_current_file_path()
         if file_path:
@@ -275,7 +275,6 @@ class FrequencyDomain(GridLayout, BaseDomain):
                 fig.colorbar(img, ax=ax, format="%+2.f dB")
                 ax.plot(times, f0, label='f0', color='cyan', linewidth=3)
                 ax.legend(loc='upper right')
-                plt.savefig('f0_estimation.png')
 
                 fig, ax = plt.subplots()
                 S, phase = librosa.magphase(librosa.stft(y=audio, hop_length=int(self.hop_length), 
@@ -288,7 +287,7 @@ class FrequencyDomain(GridLayout, BaseDomain):
                 ax.legend(loc='upper right')
                 fig.colorbar(img, ax=ax, format="%+2.f dB")
                 ax.set(title='log Power spectrogram')
-                plt.savefig('spectral_centroid.png')
+                plt.show()
             else:
                 D = librosa.amplitude_to_db(np.abs(librosa.stft(audio)), ref=np.max)
                 fig, ax = plt.subplots()
@@ -297,7 +296,6 @@ class FrequencyDomain(GridLayout, BaseDomain):
                 fig.colorbar(img, ax=ax, format="%+2.f dB")
                 ax.plot(times, f0, label='f0', color='cyan', linewidth=3)
                 ax.legend(loc='upper right')
-                plt.savefig('f0_estimation.png')
 
                 fig, ax = plt.subplots()
                 S, phase = librosa.magphase(librosa.stft(y=audio))
@@ -307,10 +305,8 @@ class FrequencyDomain(GridLayout, BaseDomain):
                 ax.legend(loc='upper right')
                 fig.colorbar(img, ax=ax, format="%+2.f dB")
                 ax.set(title='log Power spectrogram')
-                plt.savefig('spectral_centroid.png')
+                plt.show()
 
-        popup = MyPopup(title="Info", text="Succesfully created the image files!")
-        popup.open()
 
 
 class AnchorLayoutExample(AnchorLayout):

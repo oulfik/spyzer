@@ -1,4 +1,4 @@
-#:import librosa_features librosa_features
+#:import audio_analysis audio_analysis
 #:import widget_examples widget_examples
 #:import navigation_screen_manager navigation_screen_manager
 #:import boxlayout_with_action_bar boxlayout_with_action_bar
@@ -10,23 +10,23 @@
     padding: "10dp"
     spacing: "10dp"
     Button:
-        text: "Librosa"
-        on_press: app.manager.push("LayoutExamplesTabs")
+        text: "Audio analysis"
+        on_press: app.manager.push("AudioAnalysis")
     Label:
         padding_x: "10dp"
         text_size: self.size
         halign: 'center'
         valign: 'middle'
-        text:"Librosa functionality. View the audio files in the time domain, compute audio features and more."
+        text:"Select an audio file and compute different audio features, create plots and more."
     Button:
-        text: "Vosk"
-        on_press: app.manager.push("WidgetsExample")
+        text: "Transcription"
+        on_press: app.manager.push("Transcription")
     Label:
         padding_x: "10dp"
         text_size: self.size
         halign: 'center'
         valign: 'middle'
-        text:"Enables transcription of speech files. Various languages are supported."
+        text:"Automatical transcription of speech files. Various languages are supported."
     # Button:
     #     text: "Images"
     #     on_press: app.manager.push("ImagesExample")
@@ -38,14 +38,14 @@
         name: "MainMenu"
         MainMenu:
     Screen:
-        name: "LayoutExamplesTabs"
+        name: "AudioAnalysis"
         BoxLayoutWithActionBar:
-            title: "Librosa"
-            LayoutExamplesTabs:
+            title: "Audio analysis"
+            AudioAnalysisTabs:
     Screen:
-        name: "WidgetsExample"
+        name: "Transcription"
         BoxLayoutWithActionBar:
-            title: "Vosk"
+            title: "Transcription"
             WidgetsExample:
     Screen:
         name: "ImagesExample"
