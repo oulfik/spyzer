@@ -5,3 +5,4 @@ kivy-speech-env/
 *.jpg
 *.png
 *.gif
+test.py

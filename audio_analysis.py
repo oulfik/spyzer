@@ -8,22 +8,16 @@ from kivy.uix.button import Button
 from kivy.uix.stacklayout import StackLayout
 from kivy.core.audio import SoundLoader
 from kivy.properties import ObjectProperty, NumericProperty, StringProperty
-from kivy.uix.popup import Popup
-from kivy.clock import Clock
 
 import matplotlib.pyplot as plt
 import librosa
 import librosa.display
 import numpy as np
 
-from utils import window_hide_decorator
+from utils import window_hide_decorator, MyPopup
 
 Builder.load_file("layouts/audio_analysis.kv")
 
-
-class MyPopup(Popup):
-    title = StringProperty("Error") 
-    text = StringProperty("Value must be a positive number!") 
 
 class StackLayoutExample(StackLayout):
     def __init__(self, **kwargs):
@@ -36,10 +30,10 @@ class StackLayoutExample(StackLayout):
             self.add_widget(b)
 
 class BaseDomain():
-    frame_length = StringProperty("") 
-    hop_length = StringProperty("")
-    sound = ObjectProperty(None)
-    audio_feat_res = StringProperty("")
+    frame_length = StringProperty("2048") #default frame length in librosa
+    hop_length = StringProperty("512") #default hop length in librosa
+    sound = ObjectProperty(None) #sound object for audio playback
+    audio_feat_res = StringProperty("") #audio feature results specific for domain (frequency, time)
     plot_path = "images/analysis/"
 
     def get_current_file_path(self):
@@ -54,7 +48,7 @@ class BaseDomain():
                 raise ValueError
         except ValueError:
             print("Value must be a positive Number!")
-            popup = MyPopup()
+            popup = MyPopup(title="Error", text="Value must be a positive number!")
             popup.open()
         else:
             if self.ids.frame_length_input.text:
@@ -65,25 +59,27 @@ class BaseDomain():
 
 class TimeDomain(GridLayout, BaseDomain):
     audio_feat_res = StringProperty("Computes time domain audio features. Zero crossing rate (ZCR) and root mean square of energy (RMSE).")
+    audio_is_playing = False 
     
     def play_audio(self):
         file_path = self.get_current_file_path()
-        if file_path:
+        if file_path and self.audio_is_playing == False:
             self.sound = SoundLoader.load(file_path)
             if self.sound:
                 print("Sound found at %s" % self.sound.source)
                 print("Sound is %.3f seconds" % self.sound.length)
                 self.sound.play()
+                self.audio_is_playing = True
 
 
     def stop_audio(self):
         if self.sound:
             self.sound.stop()
+            self.audio_is_playing = False
 
     
-
+    @window_hide_decorator
     def visualize_audio(self):
-        Window.hide()
         file_path = self.get_current_file_path()
         if file_path:
             audio, _ = librosa.load(file_path)
@@ -93,24 +89,17 @@ class TimeDomain(GridLayout, BaseDomain):
             plt.title("time signal")
             plt.show()
 
-        Window.show()
 
-
+    @window_hide_decorator
     def visualize_audio_features(self):
-        Window.hide()
         file_path = self.get_current_file_path()
         if file_path:
             zcr = self.compute_zcr(file_path)
             rms = self.compute_rms(file_path)
             frames = range(len(zcr))
+            t = librosa.frames_to_time(frames, hop_length=int(self.hop_length))
 
-            if self.hop_length:
-                t = librosa.frames_to_time(frames, hop_length=int(self.hop_length))
-            else:
-                t = librosa.frames_to_time(frames)
-        
             plt.figure()
-
             ax = plt.subplot(2, 1, 1)
             plt.plot(t, zcr)
             plt.xlabel("time(s)")
@@ -122,36 +111,29 @@ class TimeDomain(GridLayout, BaseDomain):
             plt.xlabel("time(s)")
             plt.ylabel("RMS")
             plt.title("Root mean square")
-
             plt.show()
-        Window.show()
+    
 
 
 
 
     def compute_zcr(self, file_path):
         audio, _ = librosa.load(file_path)
-        if self.frame_length and self.hop_length:
-            zcr_audio = librosa.feature.zero_crossing_rate(
-                audio, 
-                frame_length=int(self.frame_length), 
-                hop_length=int(self.hop_length))[0]
-        else:
-            zcr_audio = librosa.feature.zero_crossing_rate(
-                audio)[0]
+        zcr_audio = librosa.feature.zero_crossing_rate(
+            audio, 
+            frame_length=int(self.frame_length), 
+            hop_length=int(self.hop_length))[0]
+
         return zcr_audio
                 
     
     def compute_rms(self, file_path):
         audio, _ = librosa.load(file_path)
-        if self.frame_length and self.hop_length:
-            rms_audio = librosa.feature.rms(
-                audio, 
-                frame_length=int(self.frame_length), 
-                hop_length=int(self.hop_length))[0]
-        else:
-            rms_audio = librosa.feature.rms(
-                audio)[0]
+        rms_audio = librosa.feature.rms(
+            audio, 
+            frame_length=int(self.frame_length), 
+            hop_length=int(self.hop_length))[0]
+
         return rms_audio       
 
 
@@ -181,19 +163,11 @@ class FrequencyDomain(GridLayout, BaseDomain):
         if file_path:
             audio, _ = librosa.load(file_path)
             fig, ax = plt.subplots()
-            if self.frame_length and self.hop_length:
-                S_audio = librosa.stft(audio, n_fft=int(self.frame_length), hop_length=int(self.hop_length))
-                img = librosa.display.specshow(librosa.amplitude_to_db(S_audio,ref=np.max),
-                y_axis='log', 
-                x_axis='time', 
-                ax=ax, hop_length=int(self.hop_length))
-            else:
-                S_audio = librosa.stft(audio)
-                img = librosa.display.specshow(librosa.amplitude_to_db(S_audio,ref=np.max),
-                y_axis='log',
-                x_axis='time', 
-                ax=ax)
-            
+            S_audio = librosa.stft(audio, n_fft=int(self.frame_length), hop_length=int(self.hop_length))
+            img = librosa.display.specshow(librosa.amplitude_to_db(S_audio,ref=np.max),
+            y_axis='log', 
+            x_axis='time', 
+            ax=ax, hop_length=int(self.hop_length))
             ax.set_title('Power spectrogram')
             fig.colorbar(img, ax=ax, format="%+2.0f dB")
             plt.show()
@@ -203,30 +177,20 @@ class FrequencyDomain(GridLayout, BaseDomain):
 
     def compute_f0(self, file_path):
         audio, _ = librosa.load(file_path)
-        if self.frame_length and self.hop_length:
-            f0, _, _ = librosa.pyin(audio, 
-            fmin=50, # expected minimum f0 frequency for a speech signal
-            fmax=500, # expected maximum f0 frequency for a speech signal
-            frame_length=int(self.frame_length), 
-            hop_length=int(self.hop_length))
-        else:
-            f0, _, _ = librosa.pyin(audio, 
-            fmin=50, # expected minimum f0 frequency for a speech signal
-            fmax=500) # expected maximum f0 frequency for a speech signal
-
+        f0, _, _ = librosa.pyin(audio, 
+        fmin=50, # expected minimum f0 frequency for a speech signal
+        fmax=500, # expected maximum f0 frequency for a speech signal
+        frame_length=int(self.frame_length), 
+        hop_length=int(self.hop_length))
         return f0
 
 
     def compute_sc(self, file_path):
         audio, _ = librosa.load(file_path)
-        if self.frame_length and self.hop_length:
-            sc_audio = librosa.feature.spectral_centroid(
-            y=audio, 
-            n_fft=int(self.frame_length), 
-            hop_length=int(self.hop_length))[0]
-        else:
-            sc_audio = librosa.feature.spectral_centroid(y=audio)[0]
-        
+        sc_audio = librosa.feature.spectral_centroid(
+        y=audio, 
+        n_fft=int(self.frame_length), 
+        hop_length=int(self.hop_length))[0]
         return sc_audio
     
 
@@ -256,56 +220,37 @@ class FrequencyDomain(GridLayout, BaseDomain):
             audio, _ = librosa.load(file_path)
             f0 = self.compute_f0(file_path)
             sc = self.compute_sc(file_path)
-            times = librosa.times_like(f0)
+            times = librosa.times_like(f0, hop_length=int(self.hop_length))
 
-            if self.frame_length and self.hop_length:
-                times = librosa.times_like(f0, hop_length=int(self.hop_length))
-                D = librosa.amplitude_to_db(np.abs(librosa.stft(audio, 
+            D = librosa.amplitude_to_db(np.abs(librosa.stft(audio, 
+            hop_length=int(self.hop_length), 
+            n_fft=int(self.frame_length))), 
+            ref=np.max)
+            fig, ax = plt.subplots()
+            img = librosa.display.specshow(D, 
+                x_axis='time', 
+                y_axis='log', 
+                ax=ax, 
                 hop_length=int(self.hop_length), 
-                n_fft=int(self.frame_length))), 
-                ref=np.max)
-                fig, ax = plt.subplots()
-                img = librosa.display.specshow(D, 
-                    x_axis='time', 
-                    y_axis='log', 
-                    ax=ax, 
-                    hop_length=int(self.hop_length), 
-                    n_fft=int(self.frame_length))
-                ax.set(title='pYIN fundamental frequency estimation')
-                fig.colorbar(img, ax=ax, format="%+2.f dB")
-                ax.plot(times, f0, label='f0', color='cyan', linewidth=3)
-                ax.legend(loc='upper right')
+                n_fft=int(self.frame_length))
+            ax.set(title='pYIN fundamental frequency estimation')
+            fig.colorbar(img, ax=ax, format="%+2.f dB")
+            ax.plot(times, f0, label='f0', color='cyan', linewidth=3)
+            ax.legend(loc='upper right')
 
-                fig, ax = plt.subplots()
-                S, phase = librosa.magphase(librosa.stft(y=audio, hop_length=int(self.hop_length), 
-                n_fft=int(self.frame_length)))
-                librosa.display.specshow(librosa.amplitude_to_db(S, ref=np.max),
-                                        y_axis='log', x_axis='time', ax=ax, 
-                                        hop_length=int(self.hop_length), 
-                                        n_fft=int(self.frame_length))
-                ax.plot(times, sc.T, label='Spectral centroid', color='w')
-                ax.legend(loc='upper right')
-                fig.colorbar(img, ax=ax, format="%+2.f dB")
-                ax.set(title='log Power spectrogram')
-                plt.show()
-            else:
-                D = librosa.amplitude_to_db(np.abs(librosa.stft(audio)), ref=np.max)
-                fig, ax = plt.subplots()
-                img = librosa.display.specshow(D, x_axis='time', y_axis='log', ax=ax)
-                ax.set(title='pYIN fundamental frequency estimation')
-                fig.colorbar(img, ax=ax, format="%+2.f dB")
-                ax.plot(times, f0, label='f0', color='cyan', linewidth=3)
-                ax.legend(loc='upper right')
+            fig, ax = plt.subplots()
+            S, phase = librosa.magphase(librosa.stft(y=audio, hop_length=int(self.hop_length), 
+            n_fft=int(self.frame_length)))
+            librosa.display.specshow(librosa.amplitude_to_db(S, ref=np.max),
+                                    y_axis='log', x_axis='time', ax=ax, 
+                                    hop_length=int(self.hop_length), 
+                                    n_fft=int(self.frame_length))
+            ax.plot(times, sc.T, label='Spectral centroid', color='w')
+            ax.legend(loc='upper right')
+            fig.colorbar(img, ax=ax, format="%+2.f dB")
+            ax.set(title='log Power spectrogram')
+            plt.show()
 
-                fig, ax = plt.subplots()
-                S, phase = librosa.magphase(librosa.stft(y=audio))
-                librosa.display.specshow(librosa.amplitude_to_db(S, ref=np.max),
-                                        y_axis='log', x_axis='time', ax=ax)
-                ax.plot(times, sc.T, label='Spectral centroid', color='w')
-                ax.legend(loc='upper right')
-                fig.colorbar(img, ax=ax, format="%+2.f dB")
-                ax.set(title='log Power spectrogram')
-                plt.show()
 
 
 

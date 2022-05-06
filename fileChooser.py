@@ -5,6 +5,7 @@ from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.popup import Popup
 import os
 from kivy.lang import Builder
+from utils import MyPopup
 Builder.load_file('layouts/fileChooser.kv') 
 Builder.load_file('layouts/myPopup.kv') 
 
@@ -12,10 +13,6 @@ class LoadDialog(FloatLayout):
     load = ObjectProperty(None)
     cancel = ObjectProperty(None)
 
-
-class MyPopup(Popup):
-    title = "Warning"
-    text = "You need to select an .wav audio file!"
 
 class FileViewer(FloatLayout):
     loadfile = ObjectProperty(None)
@@ -39,7 +36,7 @@ class FileViewer(FloatLayout):
             app = App.get_running_app()
             app.audio_file = self.path_label
         else:
-            popup = MyPopup()
+            popup = MyPopup(title="Warning", text="You need to select an .wav audio file!")
             popup.open()
 
         self.dismiss_popup()

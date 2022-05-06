@@ -46,36 +46,57 @@
         valign: 'middle'
         text: "Listen to the selected audio file in the 'load audio' tab"
     Button:
+        size_hint: 1, None
+        height: "50dp"
         text: "Show signal"
         on_press: root.visualize_audio()
     Label:
         text_size: self.size
+        size_hint: 1, None
+        height: "50dp"
         halign: 'left'
         valign: 'middle'
         text: "Shows a plot of the audio signal in the time domain"
     BoxLayout:
-        spacing: "10dp"
+        spacing: "5dp"
         orientation:"vertical"
         Button:
             text: "Audio features"
             on_press: root.get_audio_feat_res()
-        TextInput:
-            id: frame_length_input
-            hint_text: "Set frame length (defaults to 2048)"
-            text: root.frame_length
-            multiline: False
-            on_text_validate: root.on_text_validate(self)
-        TextInput:
-            id: hop_length_input
-            hint_text: "Set hop length (defaults to 512)"
-            text: root.hop_length
-            multiline: False
-            on_text_validate: root.on_text_validate(self)
+        GridLayout:
+            cols: 2
+            spacing: "5dp"
+            TextInput:
+                id: frame_length_input
+                hint_text: "press enter for saving"
+                text: root.frame_length
+                multiline: False
+                on_text_validate: root.on_text_validate(self)
+            Label:
+                text_size: self.size
+                halign: 'left'
+                valign: 'middle'
+                halign: 'left'
+                text: "frame length"
+            TextInput:
+                id: hop_length_input
+                hint_text: "press enter for saving"
+                text: root.hop_length
+                multiline: False
+                on_text_validate: root.on_text_validate(self)
+            Label:
+                text_size: self.size
+                halign: 'left'
+                valign: 'middle'
+                halign: 'left'
+                text: "hop length"
     TextInput:
         text: root.audio_feat_res
         readonly: True
 
     Button:
+        size_hint: 1, None
+        height: "50dp"
         text: "Plot audio features"
         on_press: root.visualize_audio_features()
 
@@ -86,31 +107,46 @@
     padding: "10dp"
     spacing: "10dp"
     Button:
-        text: "Save spectrogram"
+        text: "Show spectrogram"
         on_press: root.show_spectrogram()
     Label:
         text_size: self.size
         halign: 'left'
         valign: 'middle'
-        text: "Saves a spectrogram of the selected audio file as an image file on disk"
+        text: "Show a spectrogram for the selected audio file"
     BoxLayout:
         spacing: "10dp"
         orientation:"vertical"
         Button:
             text: "Audio features"
             on_press: root.get_audio_feat_res()
-        TextInput:
-            id: frame_length_input
-            hint_text: "Set frame length (defaults to 2048)"
-            text: root.frame_length
-            multiline: False
-            on_text_validate: root.on_text_validate(self)
-        TextInput:
-            id: hop_length_input
-            hint_text: "Set hop length (defaults to 512)"
-            text: root.hop_length
-            multiline: False
-            on_text_validate: root.on_text_validate(self)
+        GridLayout:
+            cols: 2
+            spacing: "5dp"
+            TextInput:
+                id: frame_length_input
+                text: root.frame_length
+                hint_text: "press enter for saving"
+                multiline: False
+                on_text_validate: root.on_text_validate(self)
+            Label:
+                text_size: self.size
+                halign: 'left'
+                valign: 'middle'
+                halign: 'left'
+                text: "frame length"
+            TextInput:
+                id: hop_length_input
+                text: root.hop_length
+                hint_text: "press enter for saving"
+                multiline: False
+                on_text_validate: root.on_text_validate(self)
+            Label:
+                text_size: self.size
+                halign: 'left'
+                valign: 'middle'
+                halign: 'left'
+                text: "hop length"
     TextInput:
         text: root.audio_feat_res
         readonly: True
@@ -122,7 +158,7 @@
         text_size: self.size
         halign: 'left'
         valign: 'middle'
-        text: "Overlays the audio features in a spectrogram and saves the figure as an image file"
+        text: "Overlays the audio features in a spectrogram. Plot generation can take some time"
 
 
 
