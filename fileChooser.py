@@ -1,23 +1,27 @@
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.factory import Factory
-from kivy.properties import ObjectProperty, StringProperty
+from kivy.properties import ObjectProperty, StringProperty, ListProperty
 from kivy.uix.popup import Popup
 import os
 from kivy.lang import Builder
 from utils import MyPopup
+
 Builder.load_file('layouts/fileChooser.kv') 
 Builder.load_file('layouts/myPopup.kv') 
 
 class LoadDialog(FloatLayout):
     load = ObjectProperty(None)
     cancel = ObjectProperty(None)
+    filters = ListProperty(['*']) #specifies the filters to be applied to the files in the directory
 
 
-class FileViewer(FloatLayout):
+class FileViewer(GridLayout):
     loadfile = ObjectProperty(None)
     path_label = StringProperty("Please select an audio file.")
-
+    
     def dismiss_popup(self):
         self._popup.dismiss()
 

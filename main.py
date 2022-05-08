@@ -19,6 +19,11 @@ class SpyzerApp(App):
     manager = ObjectProperty(None)
     audio_file = StringProperty("")
 
+    # variables for transcription functionality
+    model_path = StringProperty("")
+    speech_path = StringProperty("")
+    transcription_res_path = StringProperty("")
+
     def build(self):
         self.manager = MyScreenManager()
         return self.manager

@@ -1,25 +1,21 @@
 
 
 <FileViewer>:
+    cols: 2
+    spacing:"10dp"
+    Button:
+        size_hint: 1, None
+        height: "30dp"
+        text: 'Open'
+        on_release: root.show_load()
+    Label:
+        size_hint: 1, None
+        height: "30dp"
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'
+        text: root.path_label
 
-    BoxLayout:
-        orientation: 'horizontal'
-        spacing: "10dp"
-        padding: "10dp"
-        Button:
-            size_hint: 1, None
-            height: "30dp"
-            pos_hint: {'center_y': .9}
-            text: 'Laden'
-            on_release: root.show_load()
-        Label:
-            size_hint: 1, None
-            height: "30dp"
-            pos_hint: {'center_y': .9}
-            text_size: self.size
-            halign: 'left'
-            valign: 'middle'
-            text: root.path_label
 
 <LoadDialog>:
     BoxLayout:
@@ -28,7 +24,7 @@
         orientation: "vertical"
         FileChooserListView:
             id: filechooser
-
+            filters: root.filters
         BoxLayout:
             size_hint_y: None
             height: 30

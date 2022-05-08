@@ -1,0 +1,21 @@
+
+
+<Transcription>:
+    padding:"10dp"
+    orientation:"vertical"
+    Label:
+        text:"Step 1"
+    ModelChooser:
+    Label:
+        text:"Step 2"
+    SpeechChooser:
+    Label:
+        text:"Step 3"
+    ResultsChooser:
+    Label:
+        text:"Final"
+    Button:
+        size_hint: 1, None
+        height: "50dp"
+        on_press:root.vosk_output()
+        text:"Start transcription"
