@@ -1,13 +1,14 @@
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
 from kivy.properties import StringProperty, ListProperty
 from fileChooser import FileViewer, LoadDialog
 from kivy.uix.popup import Popup
 from kivy.app import App
-
+import concurrent.futures
+from kivy.clock import Clock
+from functools import partial
 from vosk import Model, KaldiRecognizer
-from typing import List, Set, Any, Dict, Tuple, TypedDict, cast
+from typing import List, Tuple, TypedDict
 import os, json
 import subprocess
 
@@ -17,7 +18,7 @@ class LoadFolderDialog(LoadDialog):
     filters = ListProperty([''])
 
 class ModelChooser(FileViewer):
-    path_label = "Please select model folder"
+    path_label = StringProperty("Please select model folder")
 
     def show_load(self):
         content = LoadFolderDialog(load=self.load, cancel=self.dismiss_popup)
@@ -28,11 +29,12 @@ class ModelChooser(FileViewer):
     def load(self, path, filename):
         app = App.get_running_app()
         app.model_path = path
+        self.path_label = f"Model folder: {path}"
         self.dismiss_popup()
 
 
 class SpeechChooser(FileViewer):
-    path_label = "Please select folder with speech files"
+    path_label = StringProperty("Please select folder with speech files")
 
     def show_load(self):
         content = LoadFolderDialog(load=self.load, cancel=self.dismiss_popup)
@@ -43,10 +45,11 @@ class SpeechChooser(FileViewer):
     def load(self, path, filename):
         app = App.get_running_app()
         app.speech_path = path
+        self.path_label = f"Speech folder: {path}"
         self.dismiss_popup()
 
 class ResultsChooser(FileViewer):
-    path_label = "Please select folder for the transcription results"
+    path_label = StringProperty("Please select folder for the transcription results")
 
     def show_load(self):
         content = LoadFolderDialog(load=self.load, cancel=self.dismiss_popup)
@@ -57,6 +60,7 @@ class ResultsChooser(FileViewer):
     def load(self, path, filename):
         app = App.get_running_app()
         app.transcription_res_path = path
+        self.path_label = f"Transcription folder: {path}"
         self.dismiss_popup()
 
 
@@ -70,20 +74,11 @@ class VoskResult(TypedDict):
     result: List[WordInfo] #list of statistics for each word
     text: str #spoken text
 
-class WordCount(TypedDict):
-    word: str #word to be counted
-    count: int #count of spoken word
-
-class WordOccurrence(TypedDict):
-    word: str #word that occurred in speech
-    occurrences: List[Tuple[float, float]] #start and end time in sec for spoken word
-
-
 
 class Transcription(BoxLayout):
-    test = StringProperty("")
+  
     
-    def vosk_output(self) -> None:
+    def vosk_output(self):
         app = App.get_running_app()
         sample_rate=16000
         print("Wait for vosk to analyze the audio file(s)...")
@@ -108,7 +103,6 @@ class Transcription(BoxLayout):
                     break
                 if rec.AcceptWaveform(data):
                     res = json.loads(rec.Result())
-                    #print(res)
                     if 'result' in res:
                         json_array.append(VoskResult(result=[WordInfo(**info) for info in res['result']] , text=res['text']))
                 else:
@@ -122,3 +116,21 @@ class Transcription(BoxLayout):
                 json.dump(json_array, json_res)
                 print("Created vosk results file!")
         print("Vosk finished audio file processing!")
+
+
+
+    def future_is_running(self, future, dt):
+        if not future.running():
+            self.ids.start_btn.disabled = False
+            self.ids.start_btn.text = "Start transcription"
+            print("results ready")
+            return False
+
+
+    def schedule_transcription(self):
+        self.ids.start_btn.disabled = True
+        self.ids.start_btn.text = "Please wait..."
+        executor = concurrent.futures.ThreadPoolExecutor()
+        future = executor.submit(self.vosk_output)
+        Clock.schedule_interval(partial(self.future_is_running, future), 1)
+        print("returning")

@@ -4,18 +4,22 @@
     padding:"10dp"
     orientation:"vertical"
     Label:
+        id: model_label
         text:"Step 1"
     ModelChooser:
     Label:
+        id: speech_label
         text:"Step 2"
     SpeechChooser:
     Label:
+        id: results_label
         text:"Step 3"
     ResultsChooser:
     Label:
         text:"Final"
     Button:
+        id: start_btn
         size_hint: 1, None
         height: "50dp"
-        on_press:root.vosk_output()
+        on_press:root.schedule_transcription()
         text:"Start transcription"

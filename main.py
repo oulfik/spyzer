@@ -17,9 +17,11 @@ class MyScreenManager(NavigationScreenManager):
 
 class SpyzerApp(App):
     manager = ObjectProperty(None)
+
+    # global variables for audio analysis functionality
     audio_file = StringProperty("")
 
-    # variables for transcription functionality
+    # global variables for transcription functionality
     model_path = StringProperty("")
     speech_path = StringProperty("")
     transcription_res_path = StringProperty("")
