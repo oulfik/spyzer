@@ -123,7 +123,6 @@ class Transcription(BoxLayout):
         if not future.running():
             self.ids.start_btn.disabled = False
             self.ids.start_btn.text = "Start transcription"
-            print("results ready")
             return False
 
 
@@ -133,4 +132,4 @@ class Transcription(BoxLayout):
         executor = concurrent.futures.ThreadPoolExecutor()
         future = executor.submit(self.vosk_output)
         Clock.schedule_interval(partial(self.future_is_running, future), 1)
-        print("returning")
+     

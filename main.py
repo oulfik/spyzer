@@ -26,6 +26,10 @@ class SpyzerApp(App):
     speech_path = StringProperty("")
     transcription_res_path = StringProperty("")
 
+    #global variables for diarization functonality
+    speech_file = StringProperty("")
+    diarization_res_path = StringProperty("")
+
     def build(self):
         self.manager = MyScreenManager()
         return self.manager

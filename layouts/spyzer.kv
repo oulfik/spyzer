@@ -1,5 +1,6 @@
 #:import audio_analysis audio_analysis
 #:import transcription transcription
+#:import diarization diarization
 #:import navigation_screen_manager navigation_screen_manager
 #:import boxlayout_with_action_bar boxlayout_with_action_bar
 
@@ -27,10 +28,15 @@
         halign: 'center'
         valign: 'middle'
         text:"Automatical transcription of speech files. Various languages are supported."
-    # Button:
-    #     text: "Images"
-    #     on_press: app.manager.push("ImagesExample")
-
+    Button:
+        text: "Diarization"
+        on_press: app.manager.push("Diarization")
+    Label:
+        padding_x: "10dp"
+        text_size: self.size
+        halign: 'center'
+        valign: 'middle'
+        text:"Answers the question who speaks and when. Create a speaker plot or segment speech audio files."
 
 
 <MyScreenManager>:
@@ -47,7 +53,11 @@
         BoxLayoutWithActionBar:
             title: "Transcription"
             Transcription:
-
+    Screen:
+        name: "Diarization"
+        BoxLayoutWithActionBar:
+            title: "Diarization"
+            Diarization:
 
 
 

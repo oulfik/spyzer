@@ -1,0 +1,50 @@
+<Diarization>:
+    orientation:"vertical"
+    padding: "10dp"
+    spacing: "10dp"
+    SpeechFileChooser:
+    DiarizationResultsChooser:
+    GridLayout:
+        cols: 2
+        spacing: "15dp"
+        TextInput:
+            size_hint: 1, None
+            height: "30dp"
+            id: num_of_speakers
+            hint_text: "press enter for saving"
+            multiline: False
+            on_text_validate: root.on_text_validate(self)
+        Label:
+            id: file_label
+            text:"Please enter the number of speakers"
+            size_hint: 1, None
+            height: "30dp"
+            text_size: self.size
+            halign: 'left'
+            valign: 'middle'
+        Button:
+            id: plot_btn
+            text:"Create speaker plot"
+            size_hint: 1, None
+            height: "40dp"
+            on_press: root.speaker_plot()
+        Label:
+            text:"Shows in a plot who speaks and when"
+            size_hint: 1, None
+            height: "40dp"
+            text_size: self.size
+            halign: 'left'
+            valign: 'middle'
+        Button:
+            id: segment_btn
+            text:"Segment audio"
+            size_hint: 1, None
+            height: "40dp"
+            on_press: root.schedule_diarization()
+        Label:
+            text:"Create audio segments from the original speech file. Each segment represents a specific speaker. "
+            size_hint: 1, None
+            height: "40dp"
+            text_size: self.size
+            halign: 'left'
+            valign: 'middle'
