@@ -34,7 +34,7 @@ class BaseDomain():
     hop_length = StringProperty("512") #default hop length in librosa
     sound = ObjectProperty(None) #sound object for audio playback
     audio_feat_res = StringProperty("") #audio feature results specific for domain (frequency, time)
-    plot_path = "images/analysis/"
+
 
     def get_current_file_path(self):
         app = App.get_running_app()
