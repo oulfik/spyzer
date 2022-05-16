@@ -1,4 +1,5 @@
-from pyAudioAnalysis import audioSegmentation as aS
+#from pyAudioAnalysis import audioSegmentation as aS
+import pyAudioAnalysis.audioSegmentation as aS
 from pydub import AudioSegment
 from typing import List, Tuple, TypedDict
 from kivy.uix.boxlayout import BoxLayout
@@ -67,9 +68,9 @@ class Diarization(BoxLayout):
     num_of_speakers = NumericProperty()
 
 
-    def segment_audio(self):
+    def segment_audio(self, speech_file):
         speaker_segments: List[Speaker] = []
-        cls, _, _ = aS.speaker_diarization("diarizationExample.wav", n_speakers=self.num_of_speakers, plot_res=False)
+        cls, _, _ = aS.speaker_diarization(speech_file, n_speakers=self.num_of_speakers, plot_res=False)
 
         start_time = 0
         for i in range(1, len(cls)):
@@ -122,7 +123,7 @@ class Diarization(BoxLayout):
     def speaker_plot(self):
         app = App.get_running_app()
         if app.speech_file and self.num_of_speakers:
-            cls, _, _ = aS.speaker_diarization("diarizationExample.wav", n_speakers=self.num_of_speakers, plot_res=True)
+            cls, _, _ = aS.speaker_diarization(app.speech_file, n_speakers=self.num_of_speakers, plot_res=True)
 
 
     def on_text_validate(self, widget):
@@ -154,6 +155,6 @@ class Diarization(BoxLayout):
             self.ids.segment_btn.disabled = True
             self.ids.segment_btn.text = "Please wait..."
             executor = concurrent.futures.ThreadPoolExecutor()
-            future = executor.submit(self.segment_audio)
+            future = executor.submit(self.segment_audio, app.speech_file)
             Clock.schedule_interval(partial(self.future_is_running, future), 1)
             

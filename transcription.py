@@ -81,19 +81,18 @@ class Transcription(BoxLayout):
     def vosk_output(self):
         app = App.get_running_app()
         sample_rate=16000
+        model = Model(app.model_path)
+        rec = KaldiRecognizer(model, sample_rate)
+        rec.SetWords(True)
         print("Wait for vosk to analyze the audio file(s)...")
         
         for audio_file in os.listdir(app.speech_path):
-            model = Model(app.model_path)
-            rec = KaldiRecognizer(model, sample_rate)
-            rec.SetWords(True)
-            
             print(f"Analyzing audio file: {audio_file}")
             # converts audio file to appropriate format (ffmpeg needs to be installed)
             process = subprocess.Popen(['ffmpeg', '-loglevel', 'quiet', '-i',
                                         f"{app.speech_path}/{audio_file}",
                                         '-ar', str(sample_rate) , '-ac', '1', '-f', 's16le', '-'],
-                                        stdout=subprocess.PIPE)
+                                        stdout=subprocess.PIPE, stdin=subprocess.DEVNULL)
 
             json_array = []
 
