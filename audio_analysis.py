@@ -1,13 +1,8 @@
 from kivy.lang import Builder
-from kivy.metrics import dp
 from kivy.app import App
-from kivy.uix.anchorlayout import AnchorLayout
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
-from kivy.uix.button import Button
-from kivy.uix.stacklayout import StackLayout
 from kivy.core.audio import SoundLoader
-from kivy.properties import ObjectProperty, NumericProperty, StringProperty
+from kivy.properties import ObjectProperty, StringProperty
 
 import matplotlib.pyplot as plt
 import librosa
@@ -19,15 +14,6 @@ from utils import window_hide_decorator, MyPopup
 Builder.load_file("layouts/audio_analysis.kv")
 
 
-class StackLayoutExample(StackLayout):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        # self.orientation = "lr-bt"
-        for i in range(0, 100):
-            #size = dp(100) + i*10
-            size = dp(100)
-            b = Button(text=str(i+1), size_hint=(None, None), size=(size, size))
-            self.add_widget(b)
 
 class BaseDomain():
     frame_length = StringProperty("2048") #default frame length in librosa
@@ -99,18 +85,17 @@ class TimeDomain(GridLayout, BaseDomain):
             frames = range(len(zcr))
             t = librosa.frames_to_time(frames, hop_length=int(self.hop_length))
 
-            plt.figure()
-            ax = plt.subplot(2, 1, 1)
-            plt.plot(t, zcr)
-            plt.xlabel("time(s)")
-            plt.ylabel("ZCR")
-            plt.title("Zero crossing rate")
+            fig, ax = plt.subplots(nrows=2, ncols=1, sharex=True)
+            ax[0].set(title='Zero crossing rate')
+            ax[0].set(xlabel='time(s)')
+            ax[0].set(ylabel='ZCR')
+            ax[0].plot(t, zcr)
+  
+            ax[1].set(title='Root mean square')
+            ax[1].set(xlabel='time(s)')
+            ax[1].set(ylabel='RMS')
+            ax[1].plot(t, rms)
 
-            plt.subplot(2, 1, 2)
-            plt.plot(t, rms)
-            plt.xlabel("time(s)")
-            plt.ylabel("RMS")
-            plt.title("Root mean square")
             plt.show()
     
 
@@ -226,49 +211,29 @@ class FrequencyDomain(GridLayout, BaseDomain):
             hop_length=int(self.hop_length), 
             n_fft=int(self.frame_length))), 
             ref=np.max)
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(nrows=2, ncols=1, sharex=True)
             img = librosa.display.specshow(D, 
                 x_axis='time', 
                 y_axis='log', 
-                ax=ax, 
+                ax=ax[0], 
                 hop_length=int(self.hop_length), 
                 n_fft=int(self.frame_length))
-            ax.set(title='pYIN fundamental frequency estimation')
-            fig.colorbar(img, ax=ax, format="%+2.f dB")
-            ax.plot(times, f0, label='f0', color='cyan', linewidth=3)
-            ax.legend(loc='upper right')
+            ax[0].set(title='pYIN fundamental frequency estimation')
+            ax[0].plot(times, f0, label='f0', color='cyan', linewidth=3)
+            ax[0].legend(loc='upper right')
 
-            fig, ax = plt.subplots()
             S, phase = librosa.magphase(librosa.stft(y=audio, hop_length=int(self.hop_length), 
             n_fft=int(self.frame_length)))
             librosa.display.specshow(librosa.amplitude_to_db(S, ref=np.max),
-                                    y_axis='log', x_axis='time', ax=ax, 
+                                    y_axis='log', x_axis='time', ax=ax[1], 
                                     hop_length=int(self.hop_length), 
                                     n_fft=int(self.frame_length))
-            ax.plot(times, sc.T, label='Spectral centroid', color='w')
-            ax.legend(loc='upper right')
+            ax[1].plot(times, sc.T, label='Spectral centroid', color='w')
+            ax[1].legend(loc='upper right')
             fig.colorbar(img, ax=ax, format="%+2.f dB")
-            ax.set(title='log Power spectrogram')
+            ax[1].set(title='log Power spectrogram')
             plt.show()
 
 
 
-
-class AnchorLayoutExample(AnchorLayout):
-    pass
-
-
-class BoxLayoutExample(BoxLayout):
-
-    """    def __init__(self, **kwargs):
-            super().__init__(**kwargs)
-            self.orientation = "vertical"
-            b1 = Button(text="A")
-            b2 = Button(text="B")
-            b3 = Button(text="C")
-
-            self.add_widget(b1)
-            self.add_widget(b2)
-            self.add_widget(b3)
-    """
 

@@ -8,7 +8,7 @@ import concurrent.futures
 from kivy.clock import Clock
 from functools import partial
 from vosk import Model, KaldiRecognizer
-from typing import List, Tuple, TypedDict
+from typing import List, TypedDict
 import os, json
 import subprocess
 

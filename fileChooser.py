@@ -1,8 +1,6 @@
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
-from kivy.factory import Factory
 from kivy.properties import ObjectProperty, StringProperty, ListProperty
 from kivy.uix.popup import Popup
 import os
