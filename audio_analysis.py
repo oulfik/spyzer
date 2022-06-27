@@ -52,8 +52,6 @@ class TimeDomain(GridLayout, BaseDomain):
         if file_path and self.audio_is_playing == False:
             self.sound = SoundLoader.load(file_path)
             if self.sound:
-                print("Sound found at %s" % self.sound.source)
-                print("Sound is %.3f seconds" % self.sound.length)
                 self.sound.play()
                 self.audio_is_playing = True
 
@@ -68,7 +66,7 @@ class TimeDomain(GridLayout, BaseDomain):
     def visualize_audio(self):
         file_path = self.get_current_file_path()
         if file_path:
-            audio, _ = librosa.load(file_path)
+            audio, _ = librosa.load(file_path, sr=None)
 
             plt.figure() 
             librosa.display.waveshow(audio, alpha=0.5) 
@@ -100,10 +98,8 @@ class TimeDomain(GridLayout, BaseDomain):
     
 
 
-
-
     def compute_zcr(self, file_path):
-        audio, _ = librosa.load(file_path)
+        audio, _ = librosa.load(file_path, sr=None)
         zcr_audio = librosa.feature.zero_crossing_rate(
             audio, 
             frame_length=int(self.frame_length), 
@@ -113,7 +109,7 @@ class TimeDomain(GridLayout, BaseDomain):
                 
     
     def compute_rms(self, file_path):
-        audio, _ = librosa.load(file_path)
+        audio, _ = librosa.load(file_path, sr=None)
         rms_audio = librosa.feature.rms(
             audio, 
             frame_length=int(self.frame_length), 
@@ -146,7 +142,7 @@ class FrequencyDomain(GridLayout, BaseDomain):
     def show_spectrogram(self):
         file_path = self.get_current_file_path()
         if file_path:
-            audio, _ = librosa.load(file_path)
+            audio, _ = librosa.load(file_path, sr=None)
             fig, ax = plt.subplots()
             S_audio = librosa.stft(audio, n_fft=int(self.frame_length), hop_length=int(self.hop_length))
             img = librosa.display.specshow(librosa.amplitude_to_db(S_audio,ref=np.max),
@@ -161,7 +157,7 @@ class FrequencyDomain(GridLayout, BaseDomain):
 
 
     def compute_f0(self, file_path):
-        audio, _ = librosa.load(file_path)
+        audio, _ = librosa.load(file_path, sr=None)
         f0, _, _ = librosa.pyin(audio, 
         fmin=50, # expected minimum f0 frequency for a speech signal
         fmax=500, # expected maximum f0 frequency for a speech signal
@@ -171,7 +167,7 @@ class FrequencyDomain(GridLayout, BaseDomain):
 
 
     def compute_sc(self, file_path):
-        audio, _ = librosa.load(file_path)
+        audio, _ = librosa.load(file_path, sr=None)
         sc_audio = librosa.feature.spectral_centroid(
         y=audio, 
         n_fft=int(self.frame_length), 
@@ -202,7 +198,7 @@ class FrequencyDomain(GridLayout, BaseDomain):
     def visualize_audio_features(self):
         file_path = self.get_current_file_path()
         if file_path:
-            audio, _ = librosa.load(file_path)
+            audio, _ = librosa.load(file_path, sr=None)
             f0 = self.compute_f0(file_path)
             sc = self.compute_sc(file_path)
             times = librosa.times_like(f0, hop_length=int(self.hop_length))

@@ -4,12 +4,10 @@ from pydub import AudioSegment
 from typing import List, Tuple, TypedDict
 from kivy.uix.boxlayout import BoxLayout
 from kivy.lang import Builder
-from fileChooser import FileViewer, LoadDialog
-from kivy.uix.popup import Popup
-from kivy.properties import StringProperty, ListProperty, NumericProperty
+from fileChooser import FileViewer
+from kivy.properties import NumericProperty
 from utils import MyPopup, window_hide_decorator
 from kivy.app import App
-import os
 import concurrent.futures
 from kivy.clock import Clock
 from functools import partial
@@ -17,49 +15,37 @@ from functools import partial
 
 Builder.load_file("layouts/diarization.kv")
 
-class LoadFolderDialog(LoadDialog):
-    filters = ListProperty(['*'])
-
 
 class SpeechFileChooser(FileViewer):
-    path_label = StringProperty("Please select an audio speech file")
+    def _fbrowser_success(self, instance):
+        audio_format = ""
 
-    def show_load(self):
-        content = LoadFolderDialog(load=self.load, cancel=self.dismiss_popup)
-        self._popup = Popup(title="Select speech file", content=content,
-                            size_hint=(0.9, 0.9))
-        self._popup.open()
-
-    def load(self, path, filename):
-        file_path = os.path.join(path, filename[0])
-        if ".wav" in file_path:
-            self.path_label = f"Speech file: {file_path}"
+        if instance.selection:
+            file_path = instance.selection[0]
+            audio_format = file_path.split('.')[-1]
+        
+        if audio_format == 'wav':
+            self.attached_label = file_path
             app = App.get_running_app()
             app.speech_file = file_path
         else:
-            popup = MyPopup(title="Warning", text="You need to select an .wav audio file!")
+            popup = MyPopup(title="Warning", text="You need to select a .wav audio file!")
             popup.open()
 
         self.dismiss_popup()
+        
 
 class DiarizationResultsChooser(FileViewer):
-    path_label = StringProperty("Please select a folder where you want to save the segmentation results")
-
-    def show_load(self):
-        content = LoadFolderDialog(load=self.load, cancel=self.dismiss_popup, filters=[''])
-        self._popup = Popup(title="Select folder for diarization results", content=content,
-                            size_hint=(0.9, 0.9))
-        self._popup.open()
-
-    def load(self, path, filename):
+    def _fbrowser_success(self, instance):
+        dir_path = instance.selection[0]
         app = App.get_running_app()
-        app.diarization_res_path = path
-        self.path_label = f"Segmentation folder: {path}"
+        app.diarization_res_path = dir_path
+        self.attached_label = f"Segmentation folder: {dir_path}"
         self.dismiss_popup()
 
 
 class Speaker(TypedDict):
-    speaker_id: int 
+    speaker_id: int #unique number for each speaker
     spoke_at: List[Tuple[float, float]] #start and end time in miliseconds
 
 

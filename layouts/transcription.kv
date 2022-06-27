@@ -1,5 +1,4 @@
 
-
 <Transcription>:
     padding:"10dp"
     orientation:"vertical"
@@ -7,14 +6,26 @@
         id: model_label
         text:"Step 1"
     ModelChooser:
+        attached_label: "Select model folder"
+        popup_title: "Select model folder"
+        filter_files: ['']
+        allow_dir_selection: True
     Label:
         id: speech_label
         text:"Step 2"
     SpeechChooser:
+        attached_label: "Select folder with speech files."
+        popup_title: "Select folder with speech files"
+        filter_files: ['']
+        allow_dir_selection: True
     Label:
         id: results_label
         text:"Step 3"
     ResultsChooser:
+        attached_label: "Select folder for the transcription results."
+        popup_title: "Select folder for vosk results"
+        filter_files: ['']
+        allow_dir_selection: True
     Label:
         text:"Final"
     Button:

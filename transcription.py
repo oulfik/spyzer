@@ -1,8 +1,7 @@
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import StringProperty, ListProperty
-from fileChooser import FileViewer, LoadDialog
-from kivy.uix.popup import Popup
+from fileChooser import FileViewer
+from utils import MyPopup
 from kivy.app import App
 import concurrent.futures
 from kivy.clock import Clock
@@ -14,53 +13,32 @@ import subprocess
 
 Builder.load_file("layouts/transcription.kv")
 
-class LoadFolderDialog(LoadDialog):
-    filters = ListProperty([''])
+
 
 class ModelChooser(FileViewer):
-    path_label = StringProperty("Please select model folder")
-
-    def show_load(self):
-        content = LoadFolderDialog(load=self.load, cancel=self.dismiss_popup)
-        self._popup = Popup(title="Select model folder", content=content,
-                            size_hint=(0.9, 0.9))
-        self._popup.open()
-
-    def load(self, path, filename):
+    def _fbrowser_success(self, instance):
+        dir_path = instance.selection[0]
         app = App.get_running_app()
-        app.model_path = path
-        self.path_label = f"Model folder: {path}"
+        app.model_path = dir_path
+        self.attached_label = f"Model folder: {dir_path}"
         self.dismiss_popup()
 
 
 class SpeechChooser(FileViewer):
-    path_label = StringProperty("Please select folder with speech files")
-
-    def show_load(self):
-        content = LoadFolderDialog(load=self.load, cancel=self.dismiss_popup)
-        self._popup = Popup(title="Select folder with speech files", content=content,
-                            size_hint=(0.9, 0.9))
-        self._popup.open()
-
-    def load(self, path, filename):
+    def _fbrowser_success(self, instance):
+        dir_path = instance.selection[0]
         app = App.get_running_app()
-        app.speech_path = path
-        self.path_label = f"Speech folder: {path}"
+        app.speech_path = dir_path
+        self.attached_label = f"Speech folder: {dir_path}"
         self.dismiss_popup()
 
+
 class ResultsChooser(FileViewer):
-    path_label = StringProperty("Please select folder for the transcription results")
-
-    def show_load(self):
-        content = LoadFolderDialog(load=self.load, cancel=self.dismiss_popup)
-        self._popup = Popup(title="Select folder for vosk results", content=content,
-                            size_hint=(0.9, 0.9))
-        self._popup.open()
-
-    def load(self, path, filename):
+    def _fbrowser_success(self, instance):
+        dir_path = instance.selection[0]
         app = App.get_running_app()
-        app.transcription_res_path = path
-        self.path_label = f"Transcription folder: {path}"
+        app.transcription_res_path = dir_path
+        self.attached_label = f"Transcription folder: {dir_path}"
         self.dismiss_popup()
 
 
@@ -122,6 +100,8 @@ class Transcription(BoxLayout):
         if not future.running():
             self.ids.start_btn.disabled = False
             self.ids.start_btn.text = "Start transcription"
+            popup = MyPopup(title="Info", text="Transcription complete!")
+            popup.open()
             return False
 
 
